@@ -7,6 +7,8 @@
 
 <script> 
 import * as d3 from 'd3'
+// import * as tip from 'd3-tip'
+
 import ChinaMap from '../assets/sitedata.json'
 import labelPoint from '../assets/city.json'
 
@@ -55,8 +57,7 @@ export default {
             const areas_overlayer = g.append('g') .attr('class','overlayer_areas')
             const centers_layer = g.append('g') .attr('class','layer_center')
             // const image_layer = g.append('g') .attr('class','layer_image')
-
-
+            const hover_layer = g.append('g').attr('class',"layer_hover")
             areas_layer
             .selectAll('path')
             .data(this.mapJson.features)
@@ -106,6 +107,7 @@ export default {
                 const [x,y] = projection(d.properties.center)
                 const [x2,y2] =projection(d.properties.cp)
 
+                
                 //圆环
                 const arc = d3.arc()
 
@@ -123,17 +125,38 @@ export default {
                 .attr('fill','#3396FF')
                 .attr('fill-opacity',0.5)
                 .attr('d',outData)
+        
             
-            el 
+               var anCircle  = el 
                 // append("circle") 圆
               .append("circle")
               .attr('class','excircle')
               .attr('cx',x)
               .attr('cy',y)
-              .attr('r',12)
+              .attr('r',6)
               .attr('stroke','none')
               .attr('fill','#3396FF')
-              .attr('fill-opacity',0.4)
+              let run=()=>{
+                  anCircle
+              .transition()
+              .duration(2000)
+              .ease(d3.easeLinear)
+              .delay(500)
+              .attr("r",25)
+              .attr('fill-opacity',0.1)
+              .transition()
+            //   .duration(1000)
+              .ease(d3.easeLinear)
+              .delay(500)
+              .attr("r",6)
+              .attr('fill-opacity',0)
+              .on("end",run)
+            }
+            run()
+            
+           
+
+
 
 
             
@@ -148,10 +171,9 @@ export default {
               .attr('fill','#3396FF')
 
               
-
-
             el
             .append('line')
+            .attr('class','line-type')
             .attr('x1',x)
             .attr('y1',y)
             .attr('x2',x2)
@@ -167,7 +189,45 @@ export default {
               .attr('dy','0.35em')
               .attr('fill','#3396FF')
               .text(d.properties.city)
+              .on("mouseover",function(){
+                  hover_layer
+                    .append('text')
+                    .attr('class','city')
+                    .attr('x',x2-50)
+                    .attr('y',y2-30)
+                    .style("border","solid 1px")
+                    // .style('opacity',1)
+                    .text(d.properties.name)
+
+              })
+              .on("mouseout",function(){
+                  hover_layer
+                  .select('text')
+                  .remove()
+              })
+            
+            
+              
+              
+              
             })
+
+            // hover_layer
+            // .selectAll(".center_group")
+            // .data(this.mapJson.features)
+            // .enter()
+            // .append('text')
+            // .text(function(d){
+            //     return d.properties.name
+            // })
+            // .on("mouseout",function(){
+            //     hover_layer
+            //     .style("opacity",0)
+            // })
+            // .on("mouseover",function(){
+            //     hover_layer
+            //     .style("opacity",1)
+            // })
 
         }
     },
@@ -178,6 +238,13 @@ export default {
 g .center_group:hover{
     fill: red;
     cursor: pointer;
+}
+.layer_hover{
+    background: blanchedalmond;
+    fill: red;
+}
+.line-type{
+    stroke-dasharray: 5,5;
 }
 /* .layer_center :hover{
     fill: red;
